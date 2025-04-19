@@ -5,6 +5,9 @@ import gsap from 'gsap';
 import { Sky } from 'three/examples/jsm/Addons.js';
 import fireWorksVertexShader from './shaders/fireWorks/vertex.glsl';
 import fireWorksFragmentShader from './shaders/fireWorks/fragment.glsl';
+import flagVertexShader from './shaders/flag/vertex.glsl';
+import flagFragmentShader from './shaders/flag/fragment.glsl';
+
 
 /**
  * Base
@@ -13,13 +16,15 @@ import fireWorksFragmentShader from './shaders/fireWorks/fragment.glsl';
 const gui = new GUI({ width: 340 });
 
 // Canvas
-const canvas = document.querySelector('canvas.webgl')
+const canvas = document.querySelector('canvas.webgl');
 
 // Scene
-const scene = new THREE.Scene()
+const scene = new THREE.Scene();
 
 // Loaders
-const textureLoader = new THREE.TextureLoader()
+const textureLoader = new THREE.TextureLoader();
+
+const starFleet = textureLoader.load('/textures/StarFleet.png');
 
 /**
  * Sizes
@@ -53,7 +58,7 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(1.5, 0, 6)
+camera.position.set(1.5, 0, 8)
 scene.add(camera)
 
 // Controls
@@ -69,6 +74,59 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(sizes.pixelRatio);
+
+// abmeint light for flag
+const ambientLight = new THREE.AmbientLight('#ffffff', 2);
+scene.add(ambientLight);
+
+
+/**
+ * Flag pole
+ */
+const flagPole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.3, 0.3, 14),
+    new THREE.MeshStandardMaterial({
+        color: '#ffffff',
+    })
+);
+flagPole.position.set(-10, -6, -40);
+scene.add(flagPole);
+
+/**
+ * Flag
+ */
+// Geometry
+const flagGeometry = new THREE.PlaneGeometry(1, 1, 32, 32);
+const count = flagGeometry.attributes.position.count;
+const random = new Float32Array(count);
+
+for (let i = 0; i < count; i++) {
+
+    random[i] = Math.random();
+};
+
+flagGeometry.setAttribute('aRandom', new THREE.BufferAttribute(random, 1));
+
+// Material
+const flagMaterial = new THREE.RawShaderMaterial({
+    vertexShader: flagVertexShader,
+    fragmentShader: flagFragmentShader,
+    // can also use
+    // wireframe: true,
+    // side: THREE.DoubleSide,
+    transparent: true,
+    uniforms: {
+        uFrequency: { value: new THREE.Vector2(10, 5) },
+        uTime: { value: 0 },
+        uColor: { value: new THREE.Color('orange')},
+        uTexture: { value: starFleet }
+    }, side: THREE.DoubleSide
+});
+
+const flag = new THREE.Mesh(flagGeometry, flagMaterial);
+flag.scale.y = 2/3;
+scene.add(flag);
+
 
 
 /**
@@ -172,7 +230,7 @@ const createRandomFirework = () => {
     createFirework(count, position, size, texture, radius, color);
 };
 
-createRandomFirework()
+createRandomFirework();
 
 window.addEventListener('click', createRandomFirework);
 
@@ -185,6 +243,8 @@ sky.scale.setScalar( 450000 );
 scene.add( sky );
 
 const sun = new THREE.Vector3();
+
+
 
 /// GUI
 
@@ -232,8 +292,16 @@ updateSky();
 /**
  * Animate
  */
+const clock = new THREE.Clock();
+
 const tick = () =>
 {
+
+    const elapsedTime = clock.getElapsedTime();
+
+    // update material
+    flagMaterial.uniforms.uTime.value = elapsedTime;
+
     // Update controls
     controls.update();
 
