@@ -14,6 +14,7 @@ import flagFragmentShader from './shaders/flag/fragment.glsl';
  */
 // Debug
 const gui = new GUI({ width: 340 });
+gui.close();
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl');
