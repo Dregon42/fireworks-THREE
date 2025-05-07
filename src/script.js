@@ -24,11 +24,12 @@ const scene = new THREE.Scene();
 // Loaders
 const textureLoader = new THREE.TextureLoader();
 
-const starFleet = textureLoader.load('/textures/StarFleet.png');
+const starFleet = textureLoader.load('/textures/MrMoore.jpg');
+
 
 /**
  * Sizes
- */
+*/
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight,
@@ -43,46 +44,74 @@ window.addEventListener('resize', () =>
     sizes.height = window.innerHeight;
     sizes.pixelRatio = Math.min(window.devicePixelRatio, 2);
     sizes.resolution.set(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio);
-
+    
     // Update camera
     camera.aspect = sizes.width / sizes.height
     camera.updateProjectionMatrix()
-
+    
     // Update renderer
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(sizes.pixelRatio);
 })
-
+    
 /**
  * Camera
- */
+*/
 // Base camera
 const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(-1, 0, 3)
+camera.position.set(-1, 0, 3.5)
 scene.add(camera)
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
 
-/**
- * Renderer
- */
-const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    antialias: true
-});
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(sizes.pixelRatio);
 
-// abmeint light for flag
-const ambientLight = new THREE.AmbientLight('#ffffff', 2);
-scene.add(ambientLight);
+// Audio
+const listener = new THREE.AudioListener();
+camera.add( listener );
 
+// create a global audio source
+const sound = new THREE.Audio( listener );
 
-/**
- * Flag pole
- */
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+
+const initAudio = () => {
+    // Resume the AudioContext (required by browser)
+    if (THREE.AudioContext.getContext().state === 'suspended') {
+        THREE.AudioContext.getContext().resume();
+        
+    }
+
+    audioLoader.load( '/music/groove-on-the-edge-jazz-funk-instrumental-305429.mp3', (buffer) => {
+        sound.setBuffer( buffer );
+        sound.setVolume(2);
+        sound.play();
+    });
+};
+
+window.addEventListener('click', () => {
+    initAudio();
+}, { once: true }); 
+   
+   /**
+    * Renderer
+   */
+  const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true
+    });
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(sizes.pixelRatio);
+    
+    // abmeint light for flag
+    const ambientLight = new THREE.AmbientLight('#ffffff', 2);
+    scene.add(ambientLight);
+    
+    /**
+     * Flag pole
+    */
 // TODO: rethink adding a flagpole
 
 /**
@@ -228,6 +257,7 @@ const createRandomFirework = () => {
 
 createRandomFirework();
 
+
 window.addEventListener('click', createRandomFirework);
 
 /**
@@ -245,12 +275,12 @@ const sun = new THREE.Vector3();
 /// GUI
 
 const skyParameters = {
-    turbidity: 10,
-    rayleigh: 3,
+    turbidity: 6.2,
+    rayleigh: 2.267,
     mieCoefficient: 0.005,
-    mieDirectionalG: 0.7,
-    elevation: -1,
-    azimuth: 180,
+    mieDirectionalG: 0.389,
+    elevation: -1.67,
+    azimuth: 175,
     exposure: renderer.toneMappingExposure
 };
 
@@ -290,6 +320,7 @@ updateSky();
  */
 const clock = new THREE.Clock();
 
+let lastFireworkTime = 0;
 const tick = () =>
 {
 
@@ -297,6 +328,12 @@ const tick = () =>
 
     // update material
     flagMaterial.uniforms.uTime.value = elapsedTime;
+
+    // initial fireworks
+    if (elapsedTime < 25 && elapsedTime - lastFireworkTime >= 1) {
+        createRandomFirework();
+        lastFireworkTime = elapsedTime;
+    }
 
     // Update controls
     controls.update();
