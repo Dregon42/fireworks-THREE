@@ -95,6 +95,11 @@ const initAudio = () => {
 window.addEventListener('click', () => {
     initAudio();
 }, { once: true }); 
+
+window.addEventListener('touchstart', () => {
+    initAudio();
+}, { once: true }); 
+
    
    /**
     * Renderer
