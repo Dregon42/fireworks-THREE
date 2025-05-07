@@ -330,7 +330,7 @@ const tick = () =>
     flagMaterial.uniforms.uTime.value = elapsedTime;
 
     // initial fireworks
-    if (elapsedTime < 20 && elapsedTime - lastFireworkTime >= 1) {
+    if (elapsedTime < 25 && elapsedTime - lastFireworkTime >= 1) {
         createRandomFirework();
         lastFireworkTime = elapsedTime;
     }
