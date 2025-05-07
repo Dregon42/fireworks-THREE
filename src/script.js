@@ -26,9 +26,10 @@ const textureLoader = new THREE.TextureLoader();
 
 const starFleet = textureLoader.load('/textures/StarFleet.png');
 
+
 /**
  * Sizes
- */
+*/
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight,
@@ -37,41 +38,56 @@ const sizes = {
 sizes.resolution = new THREE.Vector2(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio);
 
 window.addEventListener('resize', () =>
-{
-    // Update sizes
-    sizes.width = window.innerWidth;
-    sizes.height = window.innerHeight;
-    sizes.pixelRatio = Math.min(window.devicePixelRatio, 2);
-    sizes.resolution.set(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio);
-
-    // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
-
-    // Update renderer
-    renderer.setSize(sizes.width, sizes.height);
-    renderer.setPixelRatio(sizes.pixelRatio);
-})
-
-/**
- * Camera
- */
-// Base camera
-const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(-1, 0, 3)
-scene.add(camera)
-
-// Controls
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
-
-/**
- * Renderer
- */
-const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    antialias: true
-});
+    {
+        // Update sizes
+        sizes.width = window.innerWidth;
+        sizes.height = window.innerHeight;
+        sizes.pixelRatio = Math.min(window.devicePixelRatio, 2);
+        sizes.resolution.set(sizes.width * sizes.pixelRatio, sizes.height * sizes.pixelRatio);
+        
+        // Update camera
+        camera.aspect = sizes.width / sizes.height
+        camera.updateProjectionMatrix()
+        
+        // Update renderer
+        renderer.setSize(sizes.width, sizes.height);
+        renderer.setPixelRatio(sizes.pixelRatio);
+    })
+    
+    /**
+     * Camera
+    */
+   // Base camera
+   const camera = new THREE.PerspectiveCamera(25, sizes.width / sizes.height, 0.1, 100)
+   camera.position.set(-1, 0, 3)
+   scene.add(camera)
+   
+   // Controls
+   const controls = new OrbitControls(camera, canvas)
+   controls.enableDamping = true
+   
+   /**
+    * Renderer
+   */
+  const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true
+    });
+    // Audio
+    const listener = new THREE.AudioListener();
+    camera.add( listener );
+    
+    // create a global audio source
+    const sound = new THREE.Audio( listener );
+    
+    // load a sound and set it as the Audio object's buffer
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load( '/music/vlogs-background-music-333116.mp3', function( buffer ) {
+        sound.setBuffer( buffer );
+        sound.setLoop( false);
+        sound.setVolume( 2 );
+        sound.play();
+    });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(sizes.pixelRatio);
 
@@ -309,4 +325,3 @@ const tick = () =>
 };
 
 tick();
-// Createing ne branch
