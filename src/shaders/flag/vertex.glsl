@@ -3,6 +3,7 @@ uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
 uniform vec2 uFrequency;
 uniform float uTime;
+uniform float uMaxHeight;
 
 attribute vec3 position;
 attribute vec2 uv;
@@ -21,6 +22,11 @@ void main() {
     elevation += sin(modelPosition.y * uFrequency.y - uTime) * 0.1;
 
     modelPosition.z += elevation;
+
+    // raise flag
+    float riseAmount = uTime * 0.1;
+    riseAmount = min(riseAmount, uMaxHeight);
+    modelPosition.y += riseAmount;
 
     // modelPosition.z += sin(modelPosition.x * uFrequency.x - uTime) * 0.05; //wave animation
     // modelPosition.z += sin(modelPosition.y * uFrequency.y - uTime) * 0.015; //wave animation

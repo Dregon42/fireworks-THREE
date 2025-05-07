@@ -83,14 +83,7 @@ scene.add(ambientLight);
 /**
  * Flag pole
  */
-const flagPole = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.3, 0.3, 14),
-    new THREE.MeshStandardMaterial({
-        color: '#ffffff',
-    })
-);
-flagPole.position.set(-10, -6, -40);
-scene.add(flagPole);
+// TODO: rethink adding a flagpole
 
 /**
  * Flag
@@ -107,24 +100,27 @@ for (let i = 0; i < count; i++) {
 
 flagGeometry.setAttribute('aRandom', new THREE.BufferAttribute(random, 1));
 
+const flagParameters = {};
+flagParameters.maxHeight = 1.3;
+
 // Material
 const flagMaterial = new THREE.RawShaderMaterial({
     vertexShader: flagVertexShader,
     fragmentShader: flagFragmentShader,
-    // can also use
-    // wireframe: true,
-    // side: THREE.DoubleSide,
+    side: THREE.DoubleSide,
     transparent: true,
     uniforms: {
-        uFrequency: { value: new THREE.Vector2(10, 5) },
-        uTime: { value: 0 },
-        uColor: { value: new THREE.Color('orange')},
-        uTexture: { value: starFleet }
-    }, side: THREE.DoubleSide
+        uFrequency:new THREE.Uniform(new THREE.Vector2(10, 5)),
+        uTime:new THREE.Uniform(0),
+        uColor:new THREE.Uniform(new THREE.Color('orange')),
+        uTexture:new THREE.Uniform(starFleet),
+        uMaxHeight: new THREE.Uniform(flagParameters.maxHeight),
+    }, 
 });
 
 const flag = new THREE.Mesh(flagGeometry, flagMaterial);
-flag.scale.y = 2/3;
+flag.scale.y = 3/4;
+flag.position.set(0, -1.3, 0);
 scene.add(flag);
 
 
