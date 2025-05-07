@@ -73,6 +73,13 @@ window.addEventListener('resize', () =>
       canvas: canvas,
       antialias: true
     });
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(sizes.pixelRatio);
+    
+    // abmeint light for flag
+    const ambientLight = new THREE.AmbientLight('#ffffff', 2);
+    scene.add(ambientLight);
+    
     // Audio
     const listener = new THREE.AudioListener();
     camera.add( listener );
@@ -88,17 +95,10 @@ window.addEventListener('resize', () =>
         sound.setVolume( 2 );
         sound.play();
     });
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(sizes.pixelRatio);
-
-// abmeint light for flag
-const ambientLight = new THREE.AmbientLight('#ffffff', 2);
-scene.add(ambientLight);
-
-
-/**
- * Flag pole
- */
+    
+    /**
+     * Flag pole
+    */
 // TODO: rethink adding a flagpole
 
 /**
@@ -244,6 +244,7 @@ const createRandomFirework = () => {
 
 createRandomFirework();
 
+
 window.addEventListener('click', createRandomFirework);
 
 /**
@@ -306,6 +307,7 @@ updateSky();
  */
 const clock = new THREE.Clock();
 
+let lastFireworkTime = 0;
 const tick = () =>
 {
 
@@ -313,6 +315,12 @@ const tick = () =>
 
     // update material
     flagMaterial.uniforms.uTime.value = elapsedTime;
+
+    // initial fireworks
+    if (elapsedTime < 20 && elapsedTime - lastFireworkTime >= 1) {
+        createRandomFirework();
+        lastFireworkTime = elapsedTime;
+    }
 
     // Update controls
     controls.update();
