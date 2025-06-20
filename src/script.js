@@ -7,6 +7,7 @@ import fireWorksVertexShader from './shaders/fireWorks/vertex.glsl';
 import fireWorksFragmentShader from './shaders/fireWorks/fragment.glsl';
 import flagVertexShader from './shaders/flag/vertex.glsl';
 import flagFragmentShader from './shaders/flag/fragment.glsl';
+import { buffer } from 'three/tsl';
 
 
 /**
@@ -23,7 +24,16 @@ const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
 
 // Loaders
-const textureLoader = new THREE.TextureLoader();
+const loadingManager = new THREE.LoadingManager(
+    () => {
+        gsap.to(overlayMaterial.uniforms.uAlpha, { duration: 4, value: 0 })
+        console.log('loaded');
+    },
+    (itemsUrl, itemsLoaded, itemsTotal) => {
+        console.log(itemsUrl, itemsLoaded, itemsTotal);
+    }
+);
+const textureLoader = new THREE.TextureLoader(loadingManager);
 
 const starFleet = textureLoader.load('/textures/MrMoore.jpg');
 
@@ -76,7 +86,16 @@ camera.add( listener );
 const sound = new THREE.Audio( listener );
 
 // load a sound and set it as the Audio object's buffer
-const audioLoader = new THREE.AudioLoader();
+const audioLoader = new THREE.AudioLoader(loadingManager);
+
+let audioBuffer = null;
+audioLoader.load(
+    '/music/groove-on-the-edge-jazz-funk-instrumental-305429.mp3',
+    (buffer) => {
+        audioBuffer = buffer;
+    }
+
+)
 
 const initAudio = () => {
     // Resume the AudioContext (required by browser)
@@ -85,11 +104,11 @@ const initAudio = () => {
         
     }
 
-    audioLoader.load( '/music/groove-on-the-edge-jazz-funk-instrumental-305429.mp3', (buffer) => {
-        sound.setBuffer( buffer );
+    if (audioBuffer && !sound.isPlaying) {
+        sound.setBuffer(audioBuffer);
         sound.setVolume(2);
         sound.play();
-    });
+    }
 };
 
 window.addEventListener('click', () => {
@@ -101,23 +120,55 @@ window.addEventListener('touchstart', () => {
 }, { once: true }); 
 
    
-   /**
-    * Renderer
-   */
-  const renderer = new THREE.WebGLRenderer({
-      canvas: canvas,
-      antialias: true
-    });
-    renderer.setSize(sizes.width, sizes.height);
-    renderer.setPixelRatio(sizes.pixelRatio);
+/**
+* Renderer
+*/
+const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true
+});
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(sizes.pixelRatio);
+
+// abmeint light for flag
+const ambientLight = new THREE.AmbientLight('#ffffff', 2);
+scene.add(ambientLight);
+
+/**
+ * Load scene
+ */
+const overlayGeometry = new THREE.PlaneGeometry(2, 2, 1, 1);
+const overlayMaterial = new THREE.ShaderMaterial({
+    wireframe: false,
+    transparent: true,
+    uniforms: {
+        uAlpha: { value: 1 }
+    },
+    vertexShader: `
+
+    void main() {
+
+        gl_Position = vec4(position, 1.0);
     
-    // abmeint light for flag
-    const ambientLight = new THREE.AmbientLight('#ffffff', 2);
-    scene.add(ambientLight);
+    }
+    `,
+    fragmentShader: `
+
+    uniform float uAlpha;
+
+    void main() {
+
+        gl_FragColor = vec4(0.0, 0.0, 0.0, uAlpha);
+
+    }
+    `
+});
+const overlay = new THREE.Mesh(overlayGeometry, overlayMaterial);
+scene.add(overlay)
     
-    /**
-     * Flag pole
-    */
+/**
+ * Flag pole
+*/
 // TODO: rethink adding a flagpole
 
 /**
