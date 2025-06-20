@@ -29,7 +29,10 @@ console.log(loadingBarElement)
 
 const loadingManager = new THREE.LoadingManager(
     () => {
-        gsap.to(overlayMaterial.uniforms.uAlpha, { duration: 4, value: 0 })
+        gsap.to(overlayMaterial.uniforms.uAlpha, { duration: 4, value: 0});
+        
+        loadingBarElement.classList.add('ended');
+        loadingBarElement.style.transform = '';
         console.log('loaded');
     },
     (itemsUrl, itemsLoaded, itemsTotal) => {
@@ -37,7 +40,6 @@ const loadingManager = new THREE.LoadingManager(
         const progressRatio = itemsLoaded / itemsTotal;
 
         loadingBarElement.style.transform = `scaleX(${progressRatio})` 
-        console.log(progressRatio);
         console.log(itemsUrl, itemsLoaded, itemsTotal);
     }
 );
@@ -149,6 +151,8 @@ const overlayGeometry = new THREE.PlaneGeometry(2, 2, 1, 1);
 const overlayMaterial = new THREE.ShaderMaterial({
     wireframe: false,
     transparent: true,
+    depthWrite: false,
+    depthTest: false,
     uniforms: {
         uAlpha: { value: 1 }
     },
