@@ -24,12 +24,20 @@ const canvas = document.querySelector('canvas.webgl');
 const scene = new THREE.Scene();
 
 // Loaders
+const loadingBarElement = document.querySelector('.loading-bar') 
+console.log(loadingBarElement)
+
 const loadingManager = new THREE.LoadingManager(
     () => {
         gsap.to(overlayMaterial.uniforms.uAlpha, { duration: 4, value: 0 })
         console.log('loaded');
     },
     (itemsUrl, itemsLoaded, itemsTotal) => {
+
+        const progressRatio = itemsLoaded / itemsTotal;
+
+        loadingBarElement.style.transform = `scaleX(${progressRatio})` 
+        console.log(progressRatio);
         console.log(itemsUrl, itemsLoaded, itemsTotal);
     }
 );
